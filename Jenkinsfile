@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     triggers {
-        // 轮询 SCM 兜底：每 3 分钟检查一次
         pollSCM('H/3 * * * *')
     }
 
@@ -59,11 +58,14 @@ pipeline {
     }
 }
 
-def sendDingTalk() {
-    withCredentials([
-        string(credentialsId: 'dingtalk-webhook', variable: 'DING_WEBHOOK'),
-        string(credentialsId: 'dingtalk-secret', variable: 'DING_SECRET')
-    ]) {
-        sh 'python3 scripts/notify_dingtalk.py'
+// ↓↓↓ 关键改动：用 script 块包裹函数定义 ↓↓↓
+script {
+    def sendDingTalk() {
+        withCredentials([
+            string(credentialsId: 'dingtalk-qa', variable: 'DING_WEBHOOK'),
+            string(credentialsId: 'dingtalk-qa-secret', variable: 'DING_SECRET')
+        ]) {
+            sh 'python3 scripts/notify_dingtalk.py'
+        }
     }
 }
