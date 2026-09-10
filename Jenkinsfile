@@ -39,7 +39,13 @@ pipeline {
 - 耗时：${currentBuild.durationString}
 - [查看 Allure 报告](${env.BUILD_URL}Allure_Report)
 """
-                sendDingTalk()
+                // 直接在 script 块里写，不调用外部函数
+                withCredentials([
+                    string(credentialsId: 'dingtalk-qa', variable: 'DING_WEBHOOK'),
+                    string(credentialsId: 'dingtalk-qa-secret', variable: 'DING_SECRET')
+                ]) {
+                    sh 'python3 scripts/notify_dingtalk.py'
+                }
             }
         }
 
@@ -52,20 +58,13 @@ pipeline {
 - 耗时：${currentBuild.durationString}
 - [查看控制台日志](${env.BUILD_URL}console)
 """
-                sendDingTalk()
+                withCredentials([
+                    string(credentialsId: 'dingtalk-qa', variable: 'DING_WEBHOOK'),
+                    string(credentialsId: 'dingtalk-qa-secret', variable: 'DING_SECRET')
+                ]) {
+                    sh 'python3 scripts/notify_dingtalk.py'
+                }
             }
-        }
-    }
-}
-
-// ↓↓↓ 关键改动：用 script 块包裹函数定义 ↓↓↓
-script {
-    def sendDingTalk() {
-        withCredentials([
-            string(credentialsId: 'dingtalk-qa', variable: 'DING_WEBHOOK'),
-            string(credentialsId: 'dingtalk-qa-secret', variable: 'DING_SECRET')
-        ]) {
-            sh 'python3 scripts/notify_dingtalk.py'
         }
     }
 }
