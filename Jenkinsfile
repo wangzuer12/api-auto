@@ -10,13 +10,13 @@ pipeline {
 
         stage('Install dependencies') {
             steps {
-                bat 'python -m pip install -r requirements.txt'
+                sh 'python3 -m pip install -r requirements.txt'
             }
         }
 
         stage('Run API tests') {
             steps {
-                bat 'pytest tests/ --alluredir=allure-results'
+                sh 'python3 -m pytest tests/ --alluredir=allure-results'
             }
         }
     }
