@@ -61,8 +61,8 @@ pipeline {
 
 def sendDingTalk() {
     withCredentials([
-        string(credentialsId: 'dingtalk-webhook', variable: 'DING_WEBHOOK'),
-        string(credentialsId: 'dingtalk-secret', variable: 'DING_SECRET')
+        string(credentialsId: 'dingtalk-webhook', variable: 'https://oapi.dingtalk.com/robot/send?access_token=44c4337976a727e111c77cee7476cc692ca50011585993061689fd917efddc24'),
+        string(credentialsId: 'dingtalk-secret', variable: 'SEC57cd5e521a8f9d6adbb4945266f557afdfe21e920281c9478e08b0e2e759c45a')
     ]) {
         sh 'python3 scripts/notify_dingtalk.py'
     }
