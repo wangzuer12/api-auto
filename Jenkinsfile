@@ -63,6 +63,7 @@ pipeline {
                     string(credentialsId: 'dingtalk-qa-secret', variable: 'DING_SECRET')
                 ]) {
                     sh 'python3 scripts/notify_dingtalk.py'
+
                 }
             }
         }
