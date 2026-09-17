@@ -2,35 +2,51 @@
 
 ## 项目约束
 - 测试文件放到 tests/api/
-- 使用已有 fixture: api_session（已包含鉴权头的 requests.Session）、base_url；不要声明 token fixture，也不要把 token 作为参数传入测试函数
-- 测试函数参数只允许使用 pytest fixture: api_session, base_url, 以及参数化数据如 payload/params/expected；不要写 token
-- 禁止在测试函数签名中添加 token、headers、cookie 等鉴权参数；鉴权统一由 api_session fixture 处理
-- 不要硬编码 base_url 和 token，必须从 fixture 获取
-- 使用 @allure.feature / @allure.story / with allure.step 做步骤标记
-- 断言至少包含：status_code、业务 retCode/success/retInfo/result、关键数据字段存在性、响应时间 < 3s
-- 每个接口至少生成：1 个正向用例（基于 200 成功 example）+ 1 个异常用例（基于缺少参数/错误参数 example）
-- 使用 pytest.mark.parametrize 参数化测试数据
+- 使用已有 fixture: api_session（已包含鉴权头的 requests.Session）、base_url
+- 测试函数参数只允许: api_session, base_url, payload/params/expected 等参数化数据；禁止 token/headers/cookie 参数
+- 鉴权统一由 api_session fixture 处理，不要在测试函数里手动加 Authorization
+- 不要硬编码 base_url 和 token
+- 如果 api.url 已是完整 URL（以 http 开头），直接使用 url = api.url；如果只是路径，则 url = base_url.rstrip("/") + api.url
+- 严禁生成 API_URL = "http://..." 或 BASE_URL = "http://..." 等硬编码常量
+- 使用 @allure.feature / @allure.story / with allure.step
+- 每个接口至少 1 个正向用例 + 1 个异常用例，分开函数写
+- 使用 pytest.mark.parametrize 参数化
 - 只输出完整 Python 代码，不要解释，不要 markdown 代码块标记
-- 异常用例单独一个函数，不要和正向混在一起
-- 如果 api.url 已是完整 URL，则直接使用 url = api.url，不要拼接 base_url；base_url fixture 可保留但不强制使用
-- 不要生成 API_URL = "http://test.sycamore.com..." 这类硬编码常量；如果接口地址完整，使用 url = api.url；base_url 不要硬编码拼接
 
 ## 响应结构约定
-实际响应结构示例为：
+实际响应结构：
 {
   "result": {...},
   "retCode": 0,
-  "retInfo": None,
+  "retInfo": null,
   "success": true
 }
-因此业务断言必须优先使用：
+断言必须：
 - body.get("success") is True
 - body.get("retCode") == 0
-- body.get("retInfo") 作为错误信息字段
-- body.get("result") 作为业务数据字段
-- 关键字段从 result 中校验存在性，例如 result.get(...) is not None 或 in result
-不要默认断言 body.get("code") 或 body.get("msg")，除非 examples 中明确存在这些字段。
-如果 examples 中展示的是其他结构，以 examples 实际字段为准，但当前项目默认按 retCode/success/retInfo/result 处理。
+- body.get("retInfo") 为错误信息
+- body.get("result") 为业务数据
+- 不要默认断言 body.get("code") / body.get("msg")
+
+## 断言规则（重要）
+- 正向用例：
+    assert resp.status_code == 200
+    elapsed = resp.elapsed.total_seconds()
+    assert elapsed < 3, f"响应时间 {elapsed}s 超过 3s"
+    body = resp.json()
+    assert body.get("success") is True, f"success异常: {body.get('success')}, retInfo: {body.get('retInfo')}"
+    assert body.get("retCode") == 0, f"retCode异常: {body.get('retCode')}, retInfo: {body.get('retInfo')}"
+    assert body.get("result") is not None, f"result为空: {body}"
+    校验 result 中关键字段存在性
+
+- 异常用例：
+    1. 断言 resp.status_code 符合实际（200 或 400/422）
+    2. 解析 body = resp.json()
+    3. 对查询类接口：如果 success=True & retCode=0 但 result 核心字段为 None，断言这些字段为 None
+    4. 如果接口确实返回业务错误（success=False / retCode!=0 / retInfo非空），可断言对应字段
+    5. 不要凭猜测硬编码 success=False，按实际响应选择断言策略
+
+- 如果 Examples 为"无"，不要编造字段，严格按 retCode/success/retInfo/result 断言
 
 ## 接口信息
 接口名: {{ api.name }}
@@ -43,20 +59,15 @@ URL: {{ api.url }}
 {{ api.examples }}
 
 ## 输出格式要求
-- 文件顶部写模块 docstring 说明接口用途
-- 每个测试函数有 @allure.feature 和 @allure.story 装饰器
-- 测试函数名格式：test_{{ api.name | lower | replace('-', '_') | replace(' ', '_') }}_{场景描述}
-- 用 with allure.step() 包裹每个操作步骤
-- 请求前 allure.attach 请求 payload/params/headers 摘要
-- 响应后 allure.attach response body
-- 正向用例校验：
-    assert resp.status_code == 200
-    assert elapsed < 3
-    body = resp.json()
-    assert body.get("success") is True, f"业务success异常: {body.get('success')}, retInfo: {body.get('retInfo')}, body: {body}"
-    assert body.get("retCode") == 0, f"业务retCode异常: {body.get('retCode')}, retInfo: {body.get('retInfo')}, body: {body}"
-    assert body.get("result") is not None, f"业务result为空: {body}"
-    并按 examples/接口含义校验 result 中关键字段存在
-- 异常用例校验：
-    status_code 可按实际接口行为断言，通常为 200 或 400/422；业务上可断言 success 为 False 或 retCode != 0 或 retInfo 非空，若响应结构支持。
-    不要硬编码猜测字段，依据实际返回结构断言。
+- 文件顶部写模块 docstring
+- 必须 import: pytest, allure, json（不要 import requests）
+- 每个测试函数有 @allure.feature / @allure.story
+- 测试函数名: test_{{ api.name | lower | replace('-', '_') | replace(' ', '_') }}_{场景}
+- with allure.step() 包裹操作
+- 请求前 allure.attach payload/params
+- 响应后 allure.attach response body（json.dumps 格式化）
+- parametrize 格式：
+    @pytest.mark.parametrize("payload,expected_desc", [
+        (valid_payload, "正向-有效参数"),
+        (invalid_payload, "异常-缺少必填参数"),
+    ])

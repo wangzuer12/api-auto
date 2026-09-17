@@ -2,18 +2,16 @@ import os
 import json
 import re
 import sys
+
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from dotenv import load_dotenv
+from scripts.ai_gen.llm_client import chat, extract_code
 from jinja2 import Environment, FileSystemLoader
-from openai import OpenAI
 
-load_dotenv()
 
-client = OpenAI(
-    api_key=os.getenv("DEEPSEEK_API_KEY"),
-    base_url="https://api.deepseek.com",
-)
+
+
 
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION_PATH = ROOT / "collection.json"
@@ -24,27 +22,26 @@ env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)), autoescape=False)
 
 
 def call_deepseek(prompt: str) -> str:
-    resp = client.chat.completions.create(
+    raw_code = chat(
+        prompt=prompt,
+        system="你是接口自动化测试专家。根据接口信息生成 pytest+requests+allure 测试代码。只输出 Python 代码，不要解释，不要 markdown 代码块标记。",
         model="deepseek-chat",
-        messages=[
-            {
-                "role": "system",
-                "content": "你是接口自动化测试专家，根据 Postman 接口信息生成 pytest+requests+allure 测试代码。只输出 Python 代码，不要解释，不要 ```python 包裹。",
-            },
-            {"role": "user", "content": prompt},
-        ],
         temperature=0.1,
         max_tokens=4096,
     )
-    return resp.choices[0].message.content
+    return extract_code(raw_code)
 
 
 def slugify(text: str) -> str:
     text = text or ""
+    # 先保留字母数字中文
     text = re.sub(r"[^0-9A-Za-z一-鿿_/\- ]+", "", text)
     text = text.replace(" ", "_").replace("/", "_").replace("-", "_")
     text = re.sub(r"_+", "_", text).strip("_")
-    return text or "api"
+    # 如果结果全是中文或空，用简单命名
+    if not text or all('\u4e00' <= c <= '\u9fff' for c in text):
+        return "api_test"
+    return text
 
 
 def normalize_item(item):
@@ -105,45 +102,36 @@ def build_prompt(template_name: str, api: dict) -> str:
     return tpl.render(api=api)
 
 
-def extract_python_code(text: str) -> str:
-    text = text.strip()
-    # 如果模型还是包了代码块，去掉
-    if text.startswith("```"):
-        lines = text.splitlines()
-        if lines[0].startswith("```"):
-            lines = lines[1:]
-        if lines and lines[-1].startswith("```"):
-            lines = lines[:-1]
-        text = "\n".join(lines)
-    return text
-
 
 def write_test_file(api: dict, code: str):
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     fname = f"test_{slugify(api['name'])}.py"
-    # 避免重名覆盖可加序号，这里简单处理
     out_path = OUTPUT_DIR / fname
+
+    if out_path.exists():
+        print(f"  ⏭️ 已存在，跳过: {out_path}")
+        return
+
     out_path.write_text(code, encoding="utf-8")
-    print(f"written: {out_path}")
+    print(f"  ✅ written: {out_path}")
 
 
 def main():
-    if not os.getenv("DEEPSEEK_API_KEY"):
-        print("DEEPSEEK_API_KEY is empty. Check .env or environment.", file=sys.stderr)
-        sys.exit(1)
 
     if not COLLECTION_PATH.exists():
-        print(f"collection.json not found: {COLLECTION_PATH}", file=sys.stderr)
+        print(f"❌ Collection 文件不存在: {COLLECTION_PATH}")
         sys.exit(1)
 
     info, apis = load_collection(COLLECTION_PATH)
-    print(f"collection: {info.get('name')}, apis: {len(apis)}")
+    print(f"📦 Collection: {info.get('name')} | 接口数: {len(apis)}")
+
+    template = env.get_template("gen_test_case.j2")
 
     for api in apis:
+        rendered_prompt = template.render(api=api)
         print(f"generating: {api['method']} {api['name']} {api['url']}")
-        prompt = build_prompt("gen_test_case.j2", api)
-        code = call_deepseek(prompt)
-        code = extract_python_code(code)
+
+        code = call_deepseek(rendered_prompt)
         write_test_file(api, code)
 
 
