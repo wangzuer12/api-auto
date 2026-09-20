@@ -14,7 +14,8 @@ pipeline {
 
         stage('Install dependencies') {
             steps {
-                sh 'python3 -m pip install -r requirements.txt'
+                sh "python3 -m pip install -r requirements.txt --trusted-host 10.227.4.150"
+
             }
         }
 
