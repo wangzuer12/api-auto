@@ -21,7 +21,10 @@ def main():
             system="你是接口自动化测试专家，只输出 Python 代码。",
         )
         print("\n--- LLM 原始返回 ---")
+
         print(raw)
+
+
 
         code = extract_code(raw)
         print("\n--- 清洗后代码 ---")
