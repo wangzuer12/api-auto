@@ -7,6 +7,7 @@
 import os
 from pathlib import Path
 from openai import OpenAI
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 # 项目根目录
 ROOT = Path(__file__).resolve().parents[2]
@@ -48,10 +49,10 @@ def get_client() -> OpenAI:
         base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
     )
 
-
+@retry(stop=stop_after_attempt(2), wait=wait_fixed(2))
 def chat(
     prompt: str,
-    system: str = "你是接口自动化测试专家，只输出可运行代码或清晰分析。",
+    system: str = "你是接口自动化测试专家。根据接口信息生成 pytest+requests+allure 测试代码。只输出 Python 代码，不要解释，不要 markdown 代码块标记。",
     model: str = None,
     temperature: float = 0.1,
     max_tokens: int = 4096,

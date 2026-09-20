@@ -4,12 +4,12 @@ import allure
 
 @allure.feature("API自动化")
 class TestApi:
-    @allure.story("WES-Bam")
-    def test_wes_bam(self, login_session, test_context):
-        url = "http://test.sycamore.com/api/sycamore-wes/sunburst/v1/single/bamInfo"
+    @allure.story("SV-BAM Copy")
+    def test_sv_bam_copy(self, login_session, test_context):
+        url = "http://test.sycamore.com/api/analysis/api/wgs/result/v1/single/bamInfo"
         params = {}
         json_data = {
-            "sycId": "754927CEEA594CB5A4F88C589514D676",
+            "sycId": "73E5E598BC9A4912B6CB777518858EF0",
             "itemStatus": 2
         }
         resp = login_session.post(url, params=params, json=json_data)

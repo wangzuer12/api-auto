@@ -1181,73 +1181,10 @@
 							]
 						}
 					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "html",
-					"header": [
-						{
-							"key": "Date",
-							"value": "Sun, 20 Sep 2026 01:56:31 GMT"
-						},
-						{
-							"key": "Content-Type",
-							"value": "text/html;charset=UTF-8"
-						},
-						{
-							"key": "Content-Length",
-							"value": "65"
-						},
-						{
-							"key": "Connection",
-							"value": "keep-alive"
-						},
-						{
-							"key": "Vary",
-							"value": "Origin"
-						},
-						{
-							"key": "Vary",
-							"value": "Access-Control-Request-Method"
-						},
-						{
-							"key": "Vary",
-							"value": "Access-Control-Request-Headers"
-						},
-						{
-							"key": "Set-Cookie",
-							"value": "rememberMe=deleteMe; Path=/; Max-Age=0; Expires=Sat, 19-Sep-2026 01:56:31 GMT; SameSite=lax"
-						},
-						{
-							"key": "Cache-Control",
-							"value": "no-cache, no-store, max-age=0, must-revalidate"
-						},
-						{
-							"key": "Pragma",
-							"value": "no-cache"
-						},
-						{
-							"key": "Expires",
-							"value": "0"
-						},
-						{
-							"key": "X-Content-Type-Options",
-							"value": "nosniff"
-						},
-						{
-							"key": "Strict-Transport-Security",
-							"value": "max-age=15724800; includeSubDomains"
-						},
-						{
-							"key": "X-XSS-Protection",
-							"value": "1 ; mode=block"
-						},
-						{
-							"key": "Referrer-Policy",
-							"value": "no-referrer"
-						}
-					],
+					"_postman_previewlanguage": null,
+					"header": null,
 					"cookie": [],
-					"body": "{\"code\":0,\"retCode\":0,\"token\":\"7cc90d5e35164559b3cb766441c90540\"}"
+					"body": null
 				},
 				{
 					"name": "用户名或密码失败",
@@ -1264,7 +1201,7 @@
 							}
 						},
 						"url": {
-							"raw": "https://sunburst-test.bgi.com/sapi/sys/login",
+							"raw": "https://sunburst-test.bgi.com/sapi/sys/login?username=wangzuer2&password=44e0be6ec5d1121bb00d3fb1dc2d7de4",
 							"protocol": "https",
 							"host": [
 								"sunburst-test",
@@ -1275,72 +1212,23 @@
 								"sapi",
 								"sys",
 								"login"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "wangzuer2"
+								},
+								{
+									"key": "password",
+									"value": "44e0be6ec5d1121bb00d3fb1dc2d7de4"
+								}
 							]
 						}
 					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "html",
-					"header": [
-						{
-							"key": "Date",
-							"value": "Sun, 20 Sep 2026 01:57:20 GMT"
-						},
-						{
-							"key": "Content-Type",
-							"value": "text/html;charset=UTF-8"
-						},
-						{
-							"key": "Content-Length",
-							"value": "96"
-						},
-						{
-							"key": "Connection",
-							"value": "keep-alive"
-						},
-						{
-							"key": "Vary",
-							"value": "Origin"
-						},
-						{
-							"key": "Vary",
-							"value": "Access-Control-Request-Method"
-						},
-						{
-							"key": "Vary",
-							"value": "Access-Control-Request-Headers"
-						},
-						{
-							"key": "Cache-Control",
-							"value": "no-cache, no-store, max-age=0, must-revalidate"
-						},
-						{
-							"key": "Pragma",
-							"value": "no-cache"
-						},
-						{
-							"key": "Expires",
-							"value": "0"
-						},
-						{
-							"key": "X-Content-Type-Options",
-							"value": "nosniff"
-						},
-						{
-							"key": "Strict-Transport-Security",
-							"value": "max-age=15724800; includeSubDomains"
-						},
-						{
-							"key": "X-XSS-Protection",
-							"value": "1 ; mode=block"
-						},
-						{
-							"key": "Referrer-Policy",
-							"value": "no-referrer"
-						}
-					],
+					"_postman_previewlanguage": null,
+					"header": null,
 					"cookie": [],
-					"body": "{\"msg\":\"用户名或密码错误\",\"code\":500,\"retInfo\":\"用户名或密码错误\",\"retCode\":500}"
+					"body": null
 				}
 			]
 		}

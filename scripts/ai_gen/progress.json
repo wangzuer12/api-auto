@@ -1,0 +1,9 @@
+{
+  "completed": [
+    "POST|WES-Bam|http://test.sycamore.com/api/sycamore-wes/sunburst/v1/single/bamInfo",
+    "POST|样本更新|http://sunburst-test.bgi.com/sapi/sunburst-lab/api/lab/sap/sampleUpdateNotice",
+    "POST|获取IGV地址|http://test.sycamore.com/api/analysis/api/wgs/result/v1/family/exoncnv",
+    "POST|SV-BAM Copy|http://test.sycamore.com/api/analysis/api/wgs/result/v1/single/bamInfo",
+    "POST|loginNew|https://sunburst-test.bgi.com/sapi/sys/login?username=wangzuer2&password=44e0be6ec5d1121bb00d3fb1dc2d7de4"
+  ]
+}

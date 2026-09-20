@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# pytest / allure generated
+reports/allure-results/
+reports/allure-report/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# logs
+*.log
+logs/
+
+
+@"
+allure-results/
+allure-report/
+"@ | Out-File -FilePath .gitignore -Encoding utf8 -Append
